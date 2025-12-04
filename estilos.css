@@ -1,0 +1,126 @@
+/* estilos.css */
+
+body {
+    font-family: sans-serif;
+    margin: 20px;
+    background-color: #7cc592;
+    color: #292828;
+}
+
+h1 {
+    color: #007bff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #797676;
+    box-shadow: 0 2px 5px hsla(224, 50%, 74%, 0.102);
+}
+
+th,
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #f8f8f8;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.mensaje {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    text-align: center;
+}
+
+form div {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"],
+input[type="file"],
+select,
+textarea {
+    width: calc(100% - 22px);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button[type="submit"] {
+    background-color: #0671e4;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.cancelar {
+    color: #6c757d;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+.cancelar:hover {
+    text-decoration: underline;
+}
+
+p a {
+    color: #202e23;
+}
+
+p a:hover {
+    text-decoration: underline;
+}
+ .logo-icono {
+     width: 40px;
+     /* Define el ancho deseado */
+     height: 40px;
+     /* Define la altura deseada */
+
+     justify-content: center;
+     display: flex;
+     max-width: 100%;
+     height: auto;
+     margin: 0 auto;
+            
+ }

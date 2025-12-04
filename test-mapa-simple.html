@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Simple de Mapa</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #map { height: 400px; width: 100%; border: 2px solid #007bff; margin: 20px 0; }
+        .controls { margin: 20px 0; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>🗺️ Test de Mapa - Diagnóstico</h1>
+    
+    <div class="controls">
+        <input type="text" id="city" placeholder="Nombre de ciudad" value="bogotá">
+        <button onclick="testCity()">Buscar Ciudad</button>
+        <button onclick="testAddress()">Test Dirección</button>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div>
+        <p><strong>Latitud:</strong> <span id="lat">-</span></p>
+        <p><strong>Longitud:</strong> <span id="lng">-</span></p>
+        <p><strong>Estado:</strong> <span id="status">Iniciando...</span></p>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map;
+        let marker;
+        
+        // Verificar que Leaflet esté cargado
+        document.getElementById('status').textContent = typeof L !== 'undefined' ? 'Leaflet cargado ✅' : 'Error: Leaflet no cargado ❌';
+        
+        // Inicializar mapa básico
+        try {
+            map = L.map('map').setView([4.6097, -74.0817], 6);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            document.getElementById('status').textContent = 'Mapa inicializado ✅';
+            
+            // Evento click
+            map.on('click', function(e) {
+                if (marker) marker.remove();
+                marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+                document.getElementById('lat').textContent = e.latlng.lat.toFixed(6);
+                document.getElementById('lng').textContent = e.latlng.lng.toFixed(6);
+            });
+            
+        } catch (error) {
+            document.getElementById('status').textContent = 'Error: ' + error.message;
+            console.error('Error inicializando mapa:', error);
+        }
+        
+        function testCity() {
+            const cityName = document.getElementById('city').value;
+            document.getElementById('status').textContent = 'Buscando ' + cityName + '...';
+            
+            // Ciudades predefinidas
+            const cities = {
+                'bogotá': [4.6097, -74.0817],
+                'bogota': [4.6097, -74.0817],
+                'medellín': [6.2442, -75.5812],
+                'medellin': [6.2442, -75.5812],
+                'cali': [3.4516, -76.5320],
+                'cartagena': [10.3910, -75.4794],
+                'villavicencio': [4.1420, -73.6266],
+                'girardot': [4.3017, -74.8022],
+                'sincelejo': [9.3047, -75.3978]
+            };
+            
+            const coords = cities[cityName.toLowerCase()];
+            if (coords) {
+                map.setView(coords, 12);
+                if (marker) marker.remove();
+                marker = L.marker(coords).addTo(map).bindPopup(cityName).openPopup();
+                document.getElementById('lat').textContent = coords[0];
+                document.getElementById('lng').textContent = coords[1];
+                document.getElementById('status').textContent = 'Ciudad encontrada ✅';
+            } else {
+                document.getElementById('status').textContent = 'Ciudad no encontrada ❌';
+            }
+        }
+        
+        function testAddress() {
+            document.getElementById('status').textContent = 'Probando Nominatim...';
+            
+            fetch('https://nominatim.openstreetmap.org/search?format=json&q=bogotá,colombia&limit=1')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lng = parseFloat(data[0].lon);
+                        map.setView([lat, lng], 12);
+                        if (marker) marker.remove();
+                        marker = L.marker([lat, lng]).addTo(map).bindPopup('Nominatim: ' + data[0].display_name).openPopup();
+                        document.getElementById('lat').textContent = lat;
+                        document.getElementById('lng').textContent = lng;
+                        document.getElementById('status').textContent = 'Nominatim funciona ✅';
+                    } else {
+                        document.getElementById('status').textContent = 'Nominatim sin resultados ❌';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('status').textContent = 'Error Nominatim: ' + error.message;
+                });
+        }
+    </script>
+    
+    <p><a href="index.php">← Volver al inicio</a></p>
+</body>
+</html>
