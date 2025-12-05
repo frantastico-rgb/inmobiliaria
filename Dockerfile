@@ -10,5 +10,8 @@ RUN a2enmod rewrite
 # Copiar el código de tu aplicación al directorio web del servidor en el contenedor
 COPY . /var/www/html/
 
+# DOCUMENTAR EL PUERTO QUE APACHE ESCUCHA
+EXPOSE 80
+
 # Establecer los permisos correctos para que Apache pueda leer/escribir en la carpeta de archivos subidos
 RUN chown -R www-data:www-data /var/www/html/uploads

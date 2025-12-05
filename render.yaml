@@ -1,19 +1,18 @@
-# Archivo de configuración para Render (Versión Corregida)
 services:
   # Servicio para la Base de Datos (MariaDB)
   - type: pserv
     name: inmobiliaria-db
     env: mariadb
-    plan: free # Es buena práctica ser explícito con el plan
-    databaseName: inmobil
-    # Render se encarga del usuario y contraseña
-
+    plan: free 
+    database: inmobil # CORREGIDO: ahora es 'database'
+    
   # Servicio para la Aplicación Web (PHP + Apache)
   - type: web
     name: inmobiliaria-web
     env: docker
     dockerfilePath: ./Dockerfile
-    # Propiedades de conexión a la base de datos
+    port: 80 # AGREGADO: Puerto que expone la imagen 'php:8.1-apache'
+    
     envVars:
       - key: DB_HOST
         fromService:
@@ -34,8 +33,9 @@ services:
         fromService:
           type: pserv
           name: inmobiliaria-db
-          property: database
-    # Disco persistente para los archivos subidos
+          property: database # CORREGIDO: propiedad 'database'
+
+    # Disco persistente para los archivos subidos (ESTÁ AL NIVEL CORRECTO)
     disks:
       - name: uploads-data
         mountPath: /var/www/html/uploads
