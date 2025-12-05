@@ -1,37 +1,39 @@
 services:
-  # Servicio para la Base de Datos (SQL Administrada)
-  - type: database # CORRECCIÓN: Usar el tipo genérico 'database'
+  # Servicio para la Base de Datos (MariaDB - Usando 'pserv' como Private Service)
+  - type: pserv # CORRECCIÓN FINAL: Usamos 'pserv' para que Render lo reconozca
     name: inmobiliaria-db
+    env: mariadb # Especificamos el motor de DB
     plan: free 
-    database: inmobil # El nombre de la DB que Render creará
+    # Mantenemos 'database' para forzar la creación de la DB con el nombre 'inmobil'
+    database: inmobil 
     
   # Servicio para la Aplicación Web (PHP + Apache Dockerizado)
   - type: web
     name: inmobiliaria-web
     env: docker
     dockerfilePath: ./Dockerfile
-    # 'port: 80' se elimina permanentemente. Render lo maneja.
+    
     
     envVars:
-      # Las referencias deben apuntar al nuevo tipo genérico 'database'
+      # Las referencias deben apuntar al tipo 'pserv' del servicio de DB
       - key: DB_HOST
         fromService:
-          type: database # CORRECCIÓN: Referencia a 'database'
+          type: pserv # CORRECCIÓN: Referencia a 'pserv'
           name: inmobiliaria-db
           property: host
       - key: DB_USER
         fromService:
-          type: database # CORRECCIÓN: Referencia a 'database'
+          type: pserv # CORRECCIÓN: Referencia a 'pserv'
           name: inmobiliaria-db
           property: user
       - key: DB_PASSWORD
         fromService:
-          type: database # CORRECCIÓN: Referencia a 'database'
+          type: pserv # CORRECCIÓN: Referencia a 'pserv'
           name: inmobiliaria-db
           property: password
       - key: DB_NAME
         fromService:
-          type: database # CORRECCIÓN: Referencia a 'database'
+          type: pserv # CORRECCIÓN: Referencia a 'pserv'
           name: inmobiliaria-db
           property: database
 
