@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  # Servicio de la aplicación web (PHP + Apache)
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80" # Expone la app en el puerto 8080 de tu máquina
+    volumes:
+      # Monta el directorio de uploads para que los archivos subidos no se pierdan
+      - ./uploads:/var/www/html/uploads
+    environment:
+      # Variables de entorno para la conexión a la BD
+      # Render las sobreescribirá con los datos de la BD real
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: ""
+      DB_NAME: inmobil
+    depends_on:
+      - db # Indica que este servicio depende de la base de datos
+
+  # Servicio de la base de datos (MySQL)
+  db:
+    image: mariadb:10.6 # Usamos MariaDB que es 100% compatible con XAMPP
+    restart: always
+    environment:
+      MYSQL_DATABASE: inmobil
+      MYSQL_USER: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes' # Permite password vacío para desarrollo
+    volumes:
+      # Volumen para persistir los datos de la base de datos
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
