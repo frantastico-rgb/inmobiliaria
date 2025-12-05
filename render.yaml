@@ -1,41 +1,41 @@
 services:
-  # Servicio para la Base de Datos (MariaDB)
-  - type: mariadb # CORRECCIÓN: Usar 'mariadb' en lugar de 'pserv'
+  # Servicio para la Base de Datos (SQL Administrada)
+  - type: database # CORRECCIÓN: Usar el tipo genérico 'database'
     name: inmobiliaria-db
     plan: free 
-    # Propiedad correcta para el nombre de la DB. Render la creará con este nombre.
-    database: inmobil 
+    database: inmobil # El nombre de la DB que Render creará
     
-  # Servicio para la Aplicación Web (PHP + Apache)
+  # Servicio para la Aplicación Web (PHP + Apache Dockerizado)
   - type: web
     name: inmobiliaria-web
     env: docker
     dockerfilePath: ./Dockerfile
-    # CORRECCIÓN: Se elimina 'port: 80' para evitar el error 'field port not found'.
+    # 'port: 80' se elimina permanentemente. Render lo maneja.
     
     envVars:
+      # Las referencias deben apuntar al nuevo tipo genérico 'database'
       - key: DB_HOST
         fromService:
-          type: mariadb # CORRECCIÓN: Referencia actualizada al tipo 'mariadb'
+          type: database # CORRECCIÓN: Referencia a 'database'
           name: inmobiliaria-db
           property: host
       - key: DB_USER
         fromService:
-          type: mariadb # CORRECCIÓN: Referencia actualizada al tipo 'mariadb'
+          type: database # CORRECCIÓN: Referencia a 'database'
           name: inmobiliaria-db
           property: user
       - key: DB_PASSWORD
         fromService:
-          type: mariadb # CORRECCIÓN: Referencia actualizada al tipo 'mariadb'
+          type: database # CORRECCIÓN: Referencia a 'database'
           name: inmobiliaria-db
           property: password
       - key: DB_NAME
         fromService:
-          type: mariadb # CORRECCIÓN: Referencia actualizada al tipo 'mariadb'
+          type: database # CORRECCIÓN: Referencia a 'database'
           name: inmobiliaria-db
-          property: database # Nombre de la DB: 'inmobil'
+          property: database
 
-    # Disco persistente (disk: en singular es CORRECTO y evita el error 'field disks not found')
+    # Disco persistente (disk: en singular es correcto)
     disk:
       - name: uploads-data
         mountPath: /var/www/html/uploads
