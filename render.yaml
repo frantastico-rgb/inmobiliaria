@@ -1,22 +1,20 @@
-# Archivo de configuración para Render
-# Le dice a Render cómo construir y desplegar tus servicios.
-
+# Archivo de configuración para Render (Versión Corregida)
 services:
   # Servicio para la Base de Datos (MariaDB)
-  - type: pserv # 'pserv' es para un Servicio Privado (base de datos)
+  - type: pserv
     name: inmobiliaria-db
-    env: mariadb # Especifica que es un servicio de MariaDB
-    databaseName: inmobil # Nombre de la base de datos que creará
-    # Render manejará el usuario y la contraseña de forma segura y automática
+    env: mariadb
+    plan: free # Es buena práctica ser explícito con el plan
+    databaseName: inmobil
+    # Render se encarga del usuario y contraseña
 
   # Servicio para la Aplicación Web (PHP + Apache)
   - type: web
     name: inmobiliaria-web
-    env: docker # Le dice a Render que use nuestro Dockerfile para construir la app
-    dockerfilePath: ./Dockerfile # Ruta al Dockerfile en tu repositorio
+    env: docker
+    dockerfilePath: ./Dockerfile
+    # Propiedades de conexión a la base de datos
     envVars:
-      # Inyecta las variables de entorno de la base de datos automáticamente
-      # Esto conecta tu app con la base de datos de forma segura
       - key: DB_HOST
         fromService:
           type: pserv
@@ -37,8 +35,8 @@ services:
           type: pserv
           name: inmobiliaria-db
           property: database
+    # Disco persistente para los archivos subidos
     disks:
-      # Define un disco persistente para guardar los archivos que se suban
       - name: uploads-data
         mountPath: /var/www/html/uploads
-        sizeGB: 1 # 1 GB es más que suficiente para empezar
+        sizeGB: 1
