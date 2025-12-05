@@ -1,42 +1,42 @@
 services:
   # Servicio para la Base de Datos (MariaDB)
-  - type: pserv
+  - type: mariadb # CORRECCIÓN: Usar 'mariadb' en lugar de 'pserv'
     name: inmobiliaria-db
-    env: mariadb
     plan: free 
-    database: inmobil # CORREGIDO: ahora es 'database'
+    # Propiedad correcta para el nombre de la DB. Render la creará con este nombre.
+    database: inmobil 
     
   # Servicio para la Aplicación Web (PHP + Apache)
   - type: web
     name: inmobiliaria-web
     env: docker
     dockerfilePath: ./Dockerfile
-    port: 80 # AGREGADO: Puerto que expone la imagen 'php:8.1-apache'
+    # CORRECCIÓN: Se elimina 'port: 80' para evitar el error 'field port not found'.
     
     envVars:
       - key: DB_HOST
         fromService:
-          type: pserv
+          type: mariadb # CORRECCIÓN: Referencia actualizada al tipo 'mariadb'
           name: inmobiliaria-db
           property: host
       - key: DB_USER
         fromService:
-          type: pserv
+          type: mariadb # CORRECCIÓN: Referencia actualizada al tipo 'mariadb'
           name: inmobiliaria-db
           property: user
       - key: DB_PASSWORD
         fromService:
-          type: pserv
+          type: mariadb # CORRECCIÓN: Referencia actualizada al tipo 'mariadb'
           name: inmobiliaria-db
           property: password
       - key: DB_NAME
         fromService:
-          type: pserv
+          type: mariadb # CORRECCIÓN: Referencia actualizada al tipo 'mariadb'
           name: inmobiliaria-db
-          property: database # CORREGIDO: propiedad 'database'
+          property: database # Nombre de la DB: 'inmobil'
 
-    # Disco persistente para los archivos subidos (ESTÁ AL NIVEL CORRECTO)
-    disks:
+    # Disco persistente (disk: en singular es CORRECTO y evita el error 'field disks not found')
+    disk:
       - name: uploads-data
         mountPath: /var/www/html/uploads
         sizeGB: 1
