@@ -40,6 +40,6 @@ services:
 
     # Disco persistente (disk: en singular es correcto)
     disk:
-      - name: uploads-data
+        name: uploads-data
         mountPath: /var/www/html/uploads
         sizeGB: 1
