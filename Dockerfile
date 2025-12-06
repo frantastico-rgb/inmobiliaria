@@ -2,7 +2,9 @@
 FROM php:8.1-apache
 
 # Instalar la extensión de PHP para MySQL (MySQLi)
-RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
+# RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
+
+RUN docker-php-ext-install pdo pdo_pgsql && docker-php-ext-enable pdo pdo_pgsql
 
 # Habilitar mod_rewrite de Apache para URLs amigables (si las usas)
 RUN a2enmod rewrite
