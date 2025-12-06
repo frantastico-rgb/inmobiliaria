@@ -1,53 +1,42 @@
 <?php
-// Script para configurar la conexión y crear las tablas necesarias en PostgreSQL
-
-// 1. OBTENER CREDENCIALES DE RENDER (Variables de Entorno)
-// Estos valores se inyectan automáticamente desde tu Base de Datos de Render
-$servername = getenv('DB_HOST');
-$username = getenv('DB_USER');
-$password = getenv('DB_PASSWORD');
-$dbname = getenv('DB_NAME'); // Debería ser 'inmobil'
+// Script para crear la base de datos y las tablas necesarias
+$servername = "localhost";
+$username = "root";
+$password = "";
 
 try {
-    // 2. CREAR CONEXIÓN PDO CON DRIVER POSTGRESQL (pgsql)
-    // Conexión directa a la DB 'inmobil'
-    $pdo = new PDO("pgsql:host=$servername;dbname=$dbname;user=$username;password=$password");
+    // Crear conexión sin especificar base de datos
+    $pdo = new PDO("mysql:host=$servername", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    echo "✅ Conexión exitosa a la base de datos PostgreSQL 'inmobil'.<br>";
+    // Crear base de datos si no existe
+    $pdo->exec("CREATE DATABASE IF NOT EXISTS inmobil CHARACTER SET utf8 COLLATE utf8_spanish_ci");
+    echo "✅ Base de datos 'inmobil' creada o ya existe.<br>";
     
-    // --------------------------------------------------------------------------------
-    // 3. CREACIÓN DE ESQUEMA (AJUSTADO A POSTGRESQL)
-    // --------------------------------------------------------------------------------
-    
-    // NOTA: Eliminamos 'CREATE DATABASE' y 'USE inmobil' ya que la DB la administra Render.
+    // Seleccionar la base de datos
+    $pdo->exec("USE inmobil");
     
     // Crear tabla tipo_inmueble
     $sql_tipo_inmueble = "CREATE TABLE IF NOT EXISTS tipo_inmueble (
-        cod_tipoinm SERIAL PRIMARY KEY, -- CORRECCIÓN: AUTO_INCREMENT -> SERIAL
+        cod_tipoinm INT AUTO_INCREMENT PRIMARY KEY,
         nom_tipoinm VARCHAR(50) NOT NULL UNIQUE,
         descripcion TEXT
     )";
     $pdo->exec($sql_tipo_inmueble);
     echo "✅ Tabla 'tipo_inmueble' creada.<br>";
     
-    // Insertar tipos de inmueble básicos si no existen (PostgreSQL usa ON CONFLICT)
-    // Nota: Esta sintaxis de inserción es más robusta y moderna.
-    $insert_tipos = "
-        INSERT INTO tipo_inmueble (nom_tipoinm, descripcion) VALUES 
+    // Insertar tipos de inmueble básicos si no existen
+    $pdo->exec("INSERT IGNORE INTO tipo_inmueble (nom_tipoinm, descripcion) VALUES 
         ('Apartamento', 'Vivienda en edificio con varias unidades'),
         ('Casa', 'Vivienda unifamiliar'),
         ('Local Comercial', 'Espacio destinado a actividad comercial'),
         ('Oficina', 'Espacio destinado a actividades administrativas'),
         ('Bodega', 'Espacio de almacenamiento'),
-        ('Lote', 'Terreno sin construcción')
-        ON CONFLICT (nom_tipoinm) DO NOTHING; -- CORRECCIÓN: INSERT IGNORE -> ON CONFLICT
-    ";
-    $pdo->exec($insert_tipos);
+        ('Lote', 'Terreno sin construcción')");
     
     // Crear tabla oficinas
     $sql_oficinas = "CREATE TABLE IF NOT EXISTS oficinas (
-        cod_oficina SERIAL PRIMARY KEY, -- CORRECCIÓN: AUTO_INCREMENT -> SERIAL
+        cod_oficina INT AUTO_INCREMENT PRIMARY KEY,
         nombre_oficina VARCHAR(100) NOT NULL,
         direccion_oficina VARCHAR(200) NOT NULL,
         telefono_oficina VARCHAR(20),
@@ -61,9 +50,9 @@ try {
     $pdo->exec($sql_oficinas);
     echo "✅ Tabla 'oficinas' creada.<br>";
     
-    // Crear tabla 'oficina' (compatibilidad)
+    // También crear tabla 'oficina' para compatibilidad con lista_oficinas.php
     $sql_oficina_compat = "CREATE TABLE IF NOT EXISTS oficina (
-        Id_ofi SERIAL PRIMARY KEY, -- CORRECCIÓN: AUTO_INCREMENT -> SERIAL
+        Id_ofi INT AUTO_INCREMENT PRIMARY KEY,
         nom_ofi VARCHAR(100) NOT NULL,
         dir_ofi VARCHAR(200) NOT NULL,
         tel_ofi VARCHAR(20),
@@ -77,7 +66,7 @@ try {
     
     // Crear tabla empleados
     $sql_empleados = "CREATE TABLE IF NOT EXISTS empleados (
-        cod_emp SERIAL PRIMARY KEY, -- CORRECCIÓN: AUTO_INCREMENT -> SERIAL
+        cod_emp INT AUTO_INCREMENT PRIMARY KEY,
         nom_emp VARCHAR(100) NOT NULL,
         ape_emp VARCHAR(100) NOT NULL,
         tel_emp VARCHAR(20),
@@ -93,20 +82,20 @@ try {
     
     // Crear tabla propietarios
     $sql_propietarios = "CREATE TABLE IF NOT EXISTS propietarios (
-        cod_prop SERIAL PRIMARY KEY, -- CORRECCIÓN: AUTO_INCREMENT -> SERIAL
+        cod_prop INT AUTO_INCREMENT PRIMARY KEY,
         nom_prop VARCHAR(100) NOT NULL,
         ape_prop VARCHAR(100) NOT NULL,
         tel_prop VARCHAR(20),
         email_prop VARCHAR(100) UNIQUE,
         dir_prop VARCHAR(200),
-        fecha_registro TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP -- MEJORA: PostgreSQL prefiere 'WITHOUT TIME ZONE'
+        fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )";
     $pdo->exec($sql_propietarios);
     echo "✅ Tabla 'propietarios' creada.<br>";
     
     // Crear tabla inmuebles
     $sql_inmuebles = "CREATE TABLE IF NOT EXISTS inmuebles (
-        cod_inm SERIAL PRIMARY KEY, -- CORRECCIÓN: AUTO_INCREMENT -> SERIAL
+        cod_inm INT AUTO_INCREMENT PRIMARY KEY,
         dir_inm VARCHAR(200) NOT NULL,
         barrio_inm VARCHAR(100),
         ciudad_inm VARCHAR(100),
@@ -128,8 +117,8 @@ try {
         habitaciones INT,
         banos INT,
         garaje BOOLEAN DEFAULT FALSE,
-        estado VARCHAR(50) DEFAULT 'Disponible', -- CORRECCIÓN: ENUM -> VARCHAR (PostgreSQL no tiene ENUM, se simula con VARCHAR o CHECK)
-        fecha_registro TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- MEJORA: TIMESTAMP
+        estado ENUM('Disponible', 'Alquilado', 'Vendido', 'Mantenimiento') DEFAULT 'Disponible',
+        fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         imagen_inm VARCHAR(255),
         fk_cod_tipoinm INT,
         fk_cod_prop INT,
@@ -141,13 +130,13 @@ try {
     
     // Crear tabla clientes
     $sql_clientes = "CREATE TABLE IF NOT EXISTS clientes (
-        cod_cli SERIAL PRIMARY KEY, -- CORRECCIÓN: AUTO_INCREMENT -> SERIAL
+        cod_cli INT AUTO_INCREMENT PRIMARY KEY,
         nom_cli VARCHAR(100) NOT NULL,
         ape_cli VARCHAR(100) NOT NULL,
         tel_cli VARCHAR(20),
         email_cli VARCHAR(100) UNIQUE,
         dir_cli VARCHAR(200),
-        fecha_registro TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- MEJORA: TIMESTAMP
+        fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         fk_cod_emp_gestion INT,
         FOREIGN KEY (fk_cod_emp_gestion) REFERENCES empleados(cod_emp)
     )";
@@ -156,14 +145,14 @@ try {
     
     // Crear tabla contratos
     $sql_contratos = "CREATE TABLE IF NOT EXISTS contratos (
-        cod_contrato SERIAL PRIMARY KEY, -- CORRECCIÓN: AUTO_INCREMENT -> SERIAL
-        tipo_contrato VARCHAR(50) NOT NULL, -- CORRECCIÓN: ENUM -> VARCHAR
+        cod_contrato INT AUTO_INCREMENT PRIMARY KEY,
+        tipo_contrato ENUM('Alquiler', 'Venta') NOT NULL,
         fecha_inicio DATE NOT NULL,
         fecha_fin DATE,
         valor_contrato DECIMAL(12,2) NOT NULL,
         descripcion TEXT,
-        estado VARCHAR(50) DEFAULT 'Activo', -- CORRECCIÓN: ENUM -> VARCHAR
-        fecha_creacion TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- MEJORA: TIMESTAMP
+        estado ENUM('Activo', 'Finalizado', 'Cancelado') DEFAULT 'Activo',
+        fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         fk_cod_inm INT NOT NULL,
         fk_cod_cli INT NOT NULL,
         fk_cod_emp INT NOT NULL,
@@ -176,11 +165,11 @@ try {
     
     // Crear tabla visitas
     $sql_visitas = "CREATE TABLE IF NOT EXISTS visitas (
-        cod_visita SERIAL PRIMARY KEY, -- CORRECCIÓN: AUTO_INCREMENT -> SERIAL
-        fecha_visita TIMESTAMP WITHOUT TIME ZONE NOT NULL, -- MEJORA: DATETIME -> TIMESTAMP
+        cod_visita INT AUTO_INCREMENT PRIMARY KEY,
+        fecha_visita DATETIME NOT NULL,
         observaciones TEXT,
-        estado VARCHAR(50) DEFAULT 'Programada', -- CORRECCIÓN: ENUM -> VARCHAR
-        fecha_programacion TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- MEJORA: TIMESTAMP
+        estado ENUM('Programada', 'Realizada', 'Cancelada') DEFAULT 'Programada',
+        fecha_programacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         fk_cod_inm INT NOT NULL,
         fk_cod_cli INT NOT NULL,
         fk_cod_emp INT NOT NULL,
@@ -193,12 +182,12 @@ try {
     
     // Crear tabla inspecciones
     $sql_inspecciones = "CREATE TABLE IF NOT EXISTS inspecciones (
-        cod_inspeccion SERIAL PRIMARY KEY, -- CORRECCIÓN: AUTO_INCREMENT -> SERIAL
+        cod_inspeccion INT AUTO_INCREMENT PRIMARY KEY,
         fecha_inspeccion DATE NOT NULL,
         tipo_inspeccion VARCHAR(100),
         observaciones TEXT,
-        resultado VARCHAR(50) DEFAULT 'Pendiente', -- CORRECCIÓN: ENUM -> VARCHAR
-        fecha_creacion TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP, -- MEJORA: TIMESTAMP
+        resultado ENUM('Aprobado', 'Rechazado', 'Pendiente') DEFAULT 'Pendiente',
+        fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         fk_cod_inm INT NOT NULL,
         fk_cod_emp INT NOT NULL,
         FOREIGN KEY (fk_cod_inm) REFERENCES inmuebles(cod_inm),
@@ -213,6 +202,6 @@ try {
     echo "<a href='index.php' style='background: #2196F3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Ir a la Página Principal</a>";
     
 } catch(PDOException $e) {
-    echo "❌ Error de Conexión/Configuración de Tablas: " . $e->getMessage();
+    echo "❌ Error: " . $e->getMessage();
 }
 ?>

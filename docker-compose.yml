@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # 1. SERVICIO WEB DE LA APLICACIÓN (PHP/APACHE)
+  app:
+    build: . # Usa tu Dockerfile (ahora simplificado para MySQLi/PDO-MySQL)
+    container_name: inmobiliaria-web
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/www/html # Monta tu código PHP
+      - uploads_data:/var/www/html/uploads # Define el volumen para imágenes
+    environment:
+      # Variables que tus scripts PHP usarán para conectarse a la DB
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: password_inmobil
+      DB_NAME: inmobil
+    depends_on:
+      - db
+
+  # 2. SERVICIO DE BASE DE DATOS MARIADB
+  db:
+    image: mariadb:10.6 # Imagen estable y compatible con tu sintaxis SQL
+    container_name: inmobiliaria-db
+    environment:
+      MYSQL_ROOT_PASSWORD: password_inmobil # Contraseña de root (la usa setup_database.php)
+      MYSQL_DATABASE: inmobil # Nombre de la base de datos (para inicialización)
+    volumes:
+      - db_data:/var/lib/mysql # Almacenamiento persistente de la DB
+
+# VOLÚMENES PERSISTENTES
+volumes:
+  uploads_data: # Para las imágenes
+  db_data: # Para los datos de la DB
