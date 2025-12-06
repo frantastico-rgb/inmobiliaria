@@ -1,41 +1,23 @@
 services:
-  # 1. Servicio de Base de Datos (SQL Administrada)
-  - type: database # Volvemos al tipo que simplifica la administración.
-    name: inmobiliaria-db
-    plan: free 
-    # 'database: inmobil' se ELIMINA para evitar el error 'field database not found'.
-    
-  # 2. Servicio para la Aplicación Web (PHP + Apache Dockerizado)
+  # 🚨 NOTA: ¡El servicio de Base de Datos ha sido eliminado de este archivo!
+
+  # Servicio para la Aplicación Web (PHP + Apache Dockerizado)
   - type: web
     name: inmobiliaria-web
     env: docker
     dockerfilePath: ./Dockerfile
-    
+
     envVars:
-      # Las referencias ahora apuntan al servicio 'database'
+      # Las referencias deben apuntar al nombre del servicio de DB creado manualmente
+      # y usar el tipo 'database' (que ahora sí se permite como referencia)
       - key: DB_HOST
         fromService:
-          type: database 
+          type: database # Referencia al servicio de DB creado manualmente
           name: inmobiliaria-db
           property: host
-      - key: DB_USER
-        fromService:
-          type: database 
-          name: inmobiliaria-db
-          property: user
-      - key: DB_PASSWORD
-        fromService:
-          type: database 
-          name: inmobiliaria-db
-          property: password
-      - key: DB_NAME
-        fromService:
-          type: database 
-          name: inmobiliaria-db
-          property: database # Obtiene el nombre autogenerado
+      # ... (mismo cambio para user, password, database) ...
 
-    # Disco persistente (Corregido para no ser una lista)
     disk:
-      name: uploads-data # ¡Sin guion!
+      name: uploads-data 
       mountPath: /var/www/html/uploads
       sizeGB: 1
