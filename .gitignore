@@ -1,0 +1,46 @@
+# Composer dependencies
+/vendor/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Log and cache files
+/logs/
+*.log
+/cache/
+
+# Temporary files
+/temp/
+/tmp/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Editor-specific files
+.vscode/
+.idea/
+*.swp
+
+# Uploads directory - ignore contents but keep the directory
+/uploads/*
+!/uploads/.gitkeep
+
+# PHPSpec
+.phpspec/
+phpspec.yml
+.phpspec.yml
+
+# PHPUnit
+/phpunit.d/
+.phpunit.result.cache
+coverage.xml
+
+# Behat
+/features/bootstrap/FeatureContext.php
+.behat/
+
+# Build artifacts
+/build/

@@ -1,0 +1,3 @@
+# Este archivo asegura que el directorio 'uploads/' se incluya en el repositorio de Git.
+# El contenido de este directorio será ignorado por .gitignore,
+# pero el directorio en sí es necesario para la aplicación.
