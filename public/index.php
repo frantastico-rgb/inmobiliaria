@@ -96,7 +96,8 @@ $ciudades_resultado = $conn->query($sql_ciudades);
                     <li><a href="#inmuebles"><i class="fas fa-building"></i> Inmuebles</a></li>
                     <li><a href="mapa.php"><i class="fas fa-map"></i> Mapa</a></li>
                     <li><a href="favoritos.php"><i class="fas fa-heart"></i> Favoritos (<span id="favoritesCountNav">0</span>)</a></li>
-                    <li><a href="#contacto"><i class="fas fa-envelope"></i> Contacto</a></li>
+                    <li><a href="mailto:casametaverde@gmail.com"><i class="fas fa-envelope"></i> Contacto</a></li>
+                    <li><a href="/auth/login.php"><i class="fas fa-user-lock"></i> Iniciar sesión</a></li>
                 </ul>
             </nav>
         </div>
