@@ -1,4 +1,17 @@
 <?php
+// ================ CÓDIGO DE DEPURACIÓN TEMPORAL =================
+$debug_env_mode = getenv('ENV_MODE');
+$debug_ca_path = __DIR__ . '/ca.pem';
+$debug_ca_exists = file_exists($debug_ca_path) ? 'SI, ENCONTRADO' : 'NO, NO ENCONTRADO';
+
+die(
+    "--- INFORMACIÓN DE DEPURACIÓN DESDE RENDER ---<br><br>" .
+    "<b>Valor de ENV_MODE:</b> '" . ($debug_env_mode ?: 'NO DEFINIDO') . "'<br>" .
+    "<b>Ruta donde se busca ca.pem:</b> '" . $debug_ca_path . "'<br>" .
+    "<b>¿Existe el archivo ca.pem en esa ruta?:</b> " . $debug_ca_exists . "<br><br>" .
+    "--- FIN DE LA DEPURACIÓN ---"
+);
+
 // Lee las credenciales de la base de datos desde las variables de entorno
 // getenv() es una forma segura de obtener variables en entornos como Docker y Render
 $servername = getenv('DB_HOST') ?: '127.0.0.1';
