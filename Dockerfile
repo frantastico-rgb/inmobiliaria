@@ -1,3 +1,4 @@
+
 # Usar una imagen oficial de PHP con Apache
 FROM php:8.1-apache
 
@@ -9,6 +10,12 @@ RUN a2enmod rewrite
 
 # Copiar el código de tu aplicación al directorio web del servidor en el contenedor
 COPY . /var/www/html/
+
+# Cambiar el DocumentRoot de Apache a /var/www/html/public
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
+# Opcional: Asegurar que el directorio <Directory> también apunte a /public
+RUN sed -i '/<Directory \/var\/www\/html\/>/,/<\/Directory>/c\<Directory /var/www/html/public/>\n    Options Indexes FollowSymLinks\n    AllowOverride All\n    Require all granted\n</Directory>' /etc/apache2/apache2.conf
 
 # DOCUMENTAR EL PUERTO QUE APACHE ESCUCHA
 EXPOSE 80
