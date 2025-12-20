@@ -1,33 +1,60 @@
-# Composer dependencies
+# ===================================================================
+# Archivo .gitignore para Proyecto PHP
+# ===================================================================
+
+# -------------------------------------------------------------------
+# Dependencias
+# -------------------------------------------------------------------
+# Ignorar la carpeta de dependencias de Composer.
 /vendor/
 
-# Environment files
+# -------------------------------------------------------------------
+# Archivos de Entorno y Configuración
+# -------------------------------------------------------------------
+# Ignorar archivos de variables de entorno que contienen credenciales.
 .env
 .env.local
 .env.*.local
 
-# Log and cache files
-/logs/
-*.log
-/cache/
-
-# Temporary files
-/temp/
-/tmp/
-
-# OS-generated files
-.DS_Store
-Thumbs.db
-
-# Editor-specific files
-.vscode/
-.idea/
-*.swp
-
-# Uploads directory - ignore contents but keep the directory
+# -------------------------------------------------------------------
+# Archivos Subidos por Usuarios
+# -------------------------------------------------------------------
+# Ignorar el contenido de 'uploads', pero mantener la carpeta vacía
+# en el repositorio gracias a la excepción para .gitkeep.
 /uploads/*
 !/uploads/.gitkeep
 
+# -------------------------------------------------------------------
+# Logs, Cache y Archivos Temporales
+# -------------------------------------------------------------------
+/logs/
+*.log
+/cache/
+/temp/
+/tmp/
+*.swp
+
+# -------------------------------------------------------------------
+# Artefactos de Build
+# -------------------------------------------------------------------
+/build/
+
+# -------------------------------------------------------------------
+# Configuración de IDEs y Editores
+# -------------------------------------------------------------------
+# Ignorar carpetas de configuración de editores de código.
+.vscode/
+.idea/
+
+# -------------------------------------------------------------------
+# Archivos Generados por el Sistema Operativo
+# -------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------------------------------------------------
+# Frameworks y Herramientas de Testing
+# -------------------------------------------------------------------
 # PHPSpec
 .phpspec/
 phpspec.yml
@@ -41,6 +68,3 @@ coverage.xml
 # Behat
 /features/bootstrap/FeatureContext.php
 .behat/
-
-# Build artifacts
-/build/
