@@ -104,10 +104,7 @@ class CompareSystem {
         list.innerHTML = '';
 
         properties.forEach(property => {
-            const imageUrl = property.foto ? 
-                `../${property.foto}` : 
-                'https://via.placeholder.com/60x45/e0e0e0/666666?text=Sin+Imagen';
-
+            const imageUrl = property.foto ? property.foto : 'https://via.placeholder.com/60x45/e0e0e0/666666?text=Sin+Imagen';
             const item = document.createElement('div');
             item.className = 'compare-mini-item';
             item.innerHTML = `

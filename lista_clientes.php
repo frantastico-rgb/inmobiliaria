@@ -49,7 +49,7 @@
 .cliente-acciones a:hover {
     color: #0056b3;
 }</style>
-    <link rel="stylesheet" href="estilos.css"> </head>
+    <link rel="stylesheet" href="css/estilos.css"> </head>
 
  <body>
 

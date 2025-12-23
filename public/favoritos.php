@@ -1,6 +1,7 @@
 <?php
 // Portal Público - Página de Favoritos
 require_once '../conexion.php';
+require_once __DIR__ . '/foto_utils.php';
 ?>
 
 <!DOCTYPE html>
@@ -108,9 +109,7 @@ require_once '../conexion.php';
             padding: 12px 20px;
             border-radius: 8px;
             font-weight: bold;
-            text-decoration: none;
-            transition: all 0.3s;
-            border: none;
+                        const imageUrl = property.foto ? property.foto : 'https://via.placeholder.com/400x250/e0e0e0/666666?text=Sin+Imagen';
             cursor: pointer;
             font-size: 14px;
             display: flex;
@@ -604,9 +603,7 @@ require_once '../conexion.php';
             const card = document.createElement('div');
             card.className = 'property-card';
             
-            const imageUrl = property.foto ? 
-                `../${property.foto}` : 
-                'https://via.placeholder.com/300x200/e0e0e0/666666?text=Sin+Imagen';
+            const imageUrl = property.foto ? property.foto : 'https://via.placeholder.com/300x200/e0e0e0/666666?text=Sin+Imagen';
 
             card.innerHTML = `
                 <div class="property-image">

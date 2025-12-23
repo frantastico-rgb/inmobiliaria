@@ -199,8 +199,8 @@ $user_role = $current_user['rol'];
             <div class="menu-card">
                 <h3>🏠 Visitas</h3>
                 <ul>
-                    <li><a href="visitas.php">➕ Programar Visita</a></li>
-                    <li><a href="lista_visitas.php">📋 Ver <?= $user_role === 'agente_junior' ? 'Mis' : '' ?> Visitas</a></li>
+                    <li><a href="visitas/crear_visita.php">➕ Programar Visita</a></li>
+                    <li><a href="visitas/lista_visitas.php">📋 Ver <?= $user_role === 'agente_junior' ? 'Mis' : '' ?> Visitas</a></li>
                 </ul>
             </div>
 

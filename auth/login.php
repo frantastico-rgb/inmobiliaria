@@ -234,8 +234,8 @@
         // Datos de demo para pruebas
         const demoUsers = {
             admin: {
-                username: 'admin',
-                password: 'admin123'
+                username: 'admin@inmobiliaria.com',
+                password: 'admin2025&*'
             },
             agente: {
                 username: 'agente1',

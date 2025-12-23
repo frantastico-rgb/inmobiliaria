@@ -1,6 +1,8 @@
 <?php
 // Portal Público - Mapa General de Inmuebles
+
 require_once '../conexion.php';
+require_once __DIR__ . '/foto_utils.php';
 
 // Obtener todos los inmuebles con coordenadas
 $sql = "SELECT i.cod_inm, i.dir_inm, i.barrio_inm, i.ciudad_inm, i.precio_alq, i.num_hab, 
@@ -15,6 +17,8 @@ $resultado = $conn->query($sql);
 $inmuebles = [];
 
 while ($inmueble = $resultado->fetch_assoc()) {
+    // Ajustar la URL de la foto a Cloudinary
+    $inmueble['foto'] = get_foto_url($inmueble['foto']);
     $inmuebles[] = $inmueble;
 }
 ?>
@@ -401,9 +405,7 @@ while ($inmueble = $resultado->fetch_assoc()) {
 
         // Crear contenido del popup
         function createPopupContent(inmueble) {
-            const imageUrl = inmueble.foto ? 
-                `../${inmueble.foto}` : 
-                'https://via.placeholder.com/200x100/e0e0e0/666666?text=Sin+Imagen';
+            const imageUrl = inmueble.foto ? inmueble.foto : 'https://via.placeholder.com/200x100/e0e0e0/666666?text=Sin+Imagen';
             
             return `
                 <div class="popup-content">

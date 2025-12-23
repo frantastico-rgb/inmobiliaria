@@ -1,0 +1,3 @@
+<?php
+// Clase de autenticación
+// ...mueve aquí la lógica actual de AuthManager...

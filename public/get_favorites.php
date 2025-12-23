@@ -1,6 +1,7 @@
 <?php
 // API para obtener datos de inmuebles favoritos
 require_once '../conexion.php';
+require_once __DIR__ . '/foto_utils.php';
 
 header('Content-Type: application/json');
 
@@ -45,6 +46,7 @@ try {
     $inmuebles = [];
 
     while ($row = $resultado->fetch_assoc()) {
+        $row['foto'] = get_foto_url($row['foto']);
         $inmuebles[] = $row;
     }
 

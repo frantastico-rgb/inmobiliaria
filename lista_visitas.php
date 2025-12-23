@@ -84,6 +84,6 @@ if ($resultado->num_rows > 0) {
         </tbody>
     </table>
 
-    <p><a href="visitas.php">Registrar Nueva Visita</a></p>
+    <p><a href="public/agente/crear_visita.php">Registrar Nueva Visita</a></p>
 </body>
 </html>

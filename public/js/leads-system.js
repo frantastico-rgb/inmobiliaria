@@ -1,4 +1,6 @@
-// Sistema de Gestión de Leads
+/**
+ * Sistema de Gestión de Leads - Optimizado para Cloudinary
+ */
 class LeadsSystem {
     constructor() {
         this.modal = null;
@@ -22,7 +24,7 @@ class LeadsSystem {
                 <div class="contact-modal-header">
                     <h3><i class="fas fa-handshake"></i> ¡Contáctanos!</h3>
                     <p>Estamos aquí para ayudarte a encontrar tu propiedad ideal</p>
-                    <button class="close-modal">&times;</button>
+                    <button class="close-modal" aria-label="Cerrar">&times;</button>
                 </div>
                 
                 <div class="contact-form-container">
@@ -79,7 +81,7 @@ class LeadsSystem {
                         <div class="form-group">
                             <label for="leadMensaje">Mensaje adicional</label>
                             <textarea id="leadMensaje" name="mensaje" 
-                                      placeholder="Cuéntanos qué tipo de propiedad buscas, características específicas, fechas de interés, etc."></textarea>
+                                      placeholder="Cuéntanos qué tipo de propiedad buscas..."></textarea>
                         </div>
 
                         <div class="form-group">
@@ -89,17 +91,16 @@ class LeadsSystem {
                             </div>
                             <div class="form-group-inline">
                                 <input type="checkbox" id="leadAceptaMarketing" name="acepta_marketing">
-                                <label for="leadAceptaMarketing">Deseo recibir ofertas especiales y noticias</label>
+                                <label for="leadAceptaMarketing">Deseo recibir ofertas y noticias</label>
                             </div>
                         </div>
 
                         <div class="form-actions">
-                            <button type="button" class="btn-cancel" onclick="leadsSystem.closeModal()">
+                            <button type="button" class="btn-cancel" id="btnCancelModal">
                                 Cancelar
                             </button>
                             <button type="submit" class="btn-submit-lead">
-                                <i class="fas fa-paper-plane"></i>
-                                Enviar consulta
+                                <i class="fas fa-paper-plane"></i> Enviar consulta
                             </button>
                         </div>
 
@@ -114,6 +115,8 @@ class LeadsSystem {
     }
 
     createFloatingCTA() {
+        if (document.getElementById('floatingCTA')) return;
+
         const floatingCTA = document.createElement('button');
         floatingCTA.className = 'cta-floating';
         floatingCTA.id = 'floatingCTA';
@@ -130,12 +133,17 @@ class LeadsSystem {
     bindEvents() {
         // Cerrar modal
         this.modal.querySelector('.close-modal').onclick = () => this.closeModal();
+        this.modal.querySelector('#btnCancelModal').onclick = () => this.closeModal();
+
         this.modal.onclick = (e) => {
             if (e.target === this.modal) this.closeModal();
         };
 
         // Enviar formulario
-        document.getElementById('leadForm').onsubmit = (e) => this.submitLead(e);
+        const form = document.getElementById('leadForm');
+        if (form) {
+            form.onsubmit = (e) => this.submitLead(e);
+        }
 
         // Escape key
         document.addEventListener('keydown', (e) => {
@@ -149,7 +157,6 @@ class LeadsSystem {
         let hasShown = false;
         window.addEventListener('scroll', () => {
             const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            
             if (scrollPercent > 25 && !hasShown) {
                 const floatingCTA = document.getElementById('floatingCTA');
                 if (floatingCTA) {
@@ -162,23 +169,22 @@ class LeadsSystem {
 
     openModal(propertyId = null, propertyInfo = null) {
         this.currentPropertyId = propertyId;
-        
-        // Pre-llenar información si viene de una propiedad específica
-        if (propertyId) {
-            document.getElementById('leadInmuebleId').value = propertyId;
-            
-            if (propertyInfo) {
-                const mensaje = `Estoy interesado en la propiedad: ${propertyInfo.direccion} - ${propertyInfo.tipo} en ${propertyInfo.ciudad}. Precio: $${propertyInfo.precio}`;
-                document.getElementById('leadMensaje').value = mensaje;
+        const mensajeInput = document.getElementById('leadMensaje');
+        const idInput = document.getElementById('leadInmuebleId');
+
+        if (propertyId && idInput) {
+            idInput.value = propertyId;
+            if (propertyInfo && mensajeInput) {
+                mensajeInput.value = `Interés en: ${propertyInfo.direccion} (${propertyInfo.tipo}) en ${propertyInfo.ciudad}. Precio ref: ${propertyInfo.precio}`;
             }
         }
 
         this.modal.classList.add('active');
         document.body.style.overflow = 'hidden';
-        
-        // Focus en primer campo
+
         setTimeout(() => {
-            document.getElementById('leadNombre').focus();
+            const nombreInput = document.getElementById('leadNombre');
+            if (nombreInput) nombreInput.focus();
         }, 300);
     }
 
@@ -189,30 +195,33 @@ class LeadsSystem {
     }
 
     resetForm() {
-        document.getElementById('leadForm').reset();
-        document.getElementById('leadInmuebleId').value = '';
+        const form = document.getElementById('leadForm');
+        if (form) form.reset();
+        const idInput = document.getElementById('leadInmuebleId');
+        if (idInput) idInput.value = '';
         this.currentPropertyId = null;
     }
 
     async submitLead(e) {
         e.preventDefault();
-
         if (this.isSubmitting) return;
 
         const submitBtn = this.modal.querySelector('.btn-submit-lead');
-        const originalText = submitBtn.innerHTML;
+        const originalContent = submitBtn.innerHTML;
 
         this.isSubmitting = true;
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<div class="loading-spinner"></div> Enviando...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
         try {
             const formData = new FormData(e.target);
-            
             const response = await fetch('procesar_lead.php', {
                 method: 'POST',
                 body: formData
             });
+
+            // Verificamos si la respuesta es OK antes de parsear JSON
+            if (!response.ok) throw new Error('Error en el servidor');
 
             const result = await response.json();
 
@@ -220,172 +229,86 @@ class LeadsSystem {
                 this.showNotification('¡Consulta enviada exitosamente!', 'success');
                 this.closeModal();
 
-                // Mostrar opción de WhatsApp si está disponible
                 if (result.whatsapp_url) {
                     setTimeout(() => {
-                        this.showWhatsAppOption(result.whatsapp_url, result.whatsapp_message);
-                    }, 1000);
+                        this.showWhatsAppOption(result.whatsapp_url);
+                    }, 800);
                 }
-
-                // Tracking opcional (Google Analytics, Facebook Pixel, etc.)
                 this.trackLeadSubmission(result.lead_id);
-
             } else {
-                throw new Error(result.error || 'Error desconocido');
+                throw new Error(result.error || 'Error al procesar');
             }
-
         } catch (error) {
-            console.error('Error al enviar lead:', error);
-            this.showNotification('Error al enviar la consulta. Inténtalo nuevamente.', 'error');
+            console.error('Error Lead System:', error);
+            this.showNotification('No pudimos enviar tu mensaje. Revisa tu conexión.', 'error');
         } finally {
             this.isSubmitting = false;
             submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
+            submitBtn.innerHTML = originalContent;
         }
     }
 
-    showWhatsAppOption(whatsappUrl, message) {
-        const notification = document.createElement('div');
-        notification.className = 'notification info';
-        notification.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                <i class="fab fa-whatsapp" style="font-size: 20px;"></i>
-                <strong>¿Quieres una respuesta más rápida?</strong>
-            </div>
-            <p style="margin: 0 0 15px 0; font-size: 14px; opacity: 0.9;">
-                Continúa la conversación por WhatsApp
-            </p>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="window.open('${whatsappUrl}', '_blank')" 
-                        style="background: #25d366; border: none; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 12px;">
-                    <i class="fab fa-whatsapp"></i> Abrir WhatsApp
-                </button>
-                <button onclick="this.parentElement.parentElement.remove()" 
-                        style="background: transparent; border: 1px solid white; color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 12px;">
-                    Cerrar
-                </button>
-            </div>
+    showWhatsAppOption(whatsappUrl) {
+        const notify = document.createElement('div');
+        notify.className = 'notification info wa-notice';
+        notify.innerHTML = `
+            <div style="margin-bottom: 8px;"><strong>¿Prefieres WhatsApp?</strong></div>
+            <button onclick="window.open('${whatsappUrl}', '_blank')" class="btn-wa-direct">
+                <i class="fab fa-whatsapp"></i> Hablar ahora
+            </button>
         `;
-
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            if (notification.parentElement) {
-                notification.remove();
-            }
-        }, 10000);
+        document.body.appendChild(notify);
+        setTimeout(() => notify.remove(), 8000);
     }
 
     showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-                <span>${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" 
-                        style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; padding: 0 5px;">
-                    &times;
-                </button>
-            </div>
-        `;
-
-        document.body.appendChild(notification);
-
+        const note = document.createElement('div');
+        note.className = `notification ${type}`;
+        note.innerHTML = `<span>${message}</span>`;
+        document.body.appendChild(note);
         setTimeout(() => {
-            if (notification.parentElement) {
-                notification.style.animation = 'fadeOut 0.3s ease forwards';
-                setTimeout(() => notification.remove(), 300);
-            }
-        }, 5000);
+            note.style.opacity = '0';
+            setTimeout(() => note.remove(), 500);
+        }, 4000);
     }
 
     trackLeadSubmission(leadId) {
-        // Google Analytics 4
         if (typeof gtag !== 'undefined') {
-            gtag('event', 'lead_submission', {
-                lead_id: leadId,
-                method: 'contact_form'
-            });
+            gtag('event', 'generate_lead', { 'lead_id': leadId });
         }
-
-        // Facebook Pixel
-        if (typeof fbq !== 'undefined') {
-            fbq('track', 'Lead', {
-                lead_id: leadId
-            });
-        }
-
-        console.log('Lead tracked:', leadId);
-    }
-
-    // Métodos públicos para integración
-    openForProperty(propertyId, propertyInfo) {
-        this.openModal(propertyId, propertyInfo);
-    }
-
-    openGeneral() {
-        this.openModal();
     }
 }
 
-// Inicializar sistema cuando el DOM esté listo
+// Inicialización Global
 let leadsSystem;
-
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     leadsSystem = new LeadsSystem();
-});
 
-// Funciones globales para compatibilidad
-function openContactModal(propertyId = null, propertyInfo = null) {
-    if (leadsSystem) {
-        leadsSystem.openModal(propertyId, propertyInfo);
-    }
-}
-
-function openGeneralContact() {
-    if (leadsSystem) {
-        leadsSystem.openGeneral();
-    }
-}
-
-// Función para agregar CTAs a propiedades existentes
-function addLeadCTAToProperty(propertyElement, propertyId, propertyInfo) {
-    const existingCTA = propertyElement.querySelector('.btn-cta-card');
-    if (existingCTA) return; // Ya existe
-
-    const cta = document.createElement('button');
-    cta.className = 'btn-cta-card';
-    cta.innerHTML = '<i class="fas fa-envelope"></i> Consultar';
-    cta.onclick = () => openContactModal(propertyId, propertyInfo);
-
-    const actionsContainer = propertyElement.querySelector('.property-actions');
-    if (actionsContainer) {
-        actionsContainer.appendChild(cta);
-    }
-}
-
-// Auto-agregar CTAs a propiedades al cargar
-document.addEventListener('DOMContentLoaded', function() {
-    // Buscar todas las tarjetas de propiedades y agregar CTAs
+    // Auto-detectar tarjetas de propiedades
     document.querySelectorAll('.property-card').forEach(card => {
-        const propertyId = card.dataset.id;
-        if (propertyId) {
-            const propertyInfo = extractPropertyInfoFromCard(card);
-            addLeadCTAToProperty(card, propertyId, propertyInfo);
+        const pid = card.dataset.id;
+        if (pid) {
+            const info = extractPropertyInfoFromCard(card);
+            const btnContainer = card.querySelector('.property-actions');
+            if (btnContainer && !card.querySelector('.btn-cta-card')) {
+                const btn = document.createElement('button');
+                btn.className = 'btn-cta-card';
+                btn.innerHTML = '<i class="fas fa-envelope"></i>';
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    leadsSystem.openModal(pid, info);
+                };
+                btnContainer.appendChild(btn);
+            }
         }
     });
 });
 
 function extractPropertyInfoFromCard(card) {
-    const title = card.querySelector('.property-title')?.textContent || '';
-    const location = card.querySelector('.property-location')?.textContent || '';
-    const price = card.querySelector('.property-price')?.textContent || '';
-    const type = card.querySelector('.feature span')?.textContent || '';
-
     return {
-        direccion: title.trim(),
-        ciudad: location.replace(/.*,\s*/, '').trim(),
-        precio: price.replace(/[^\d]/g, ''),
-        tipo: type
+        direccion: card.querySelector('.property-title')?.textContent.trim() || 'Propiedad sin título',
+        ciudad: card.querySelector('.property-location')?.textContent.trim() || '',
+        precio: card.querySelector('.property-price')?.textContent.trim() || 'Consultar',
+        tipo: card.querySelector('.feature span')?.textContent.trim() || 'Inmueble'
     };
 }

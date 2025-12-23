@@ -144,8 +144,8 @@ try {
                         <a class="nav-link" href="../oficinas.php"><i class="fas fa-plus me-2"></i>Nueva Oficina</a>
                         <a class="nav-link" href="../lista_contratos.php"><i class="fas fa-file-contract me-2"></i>Ver Contratos</a>
                         <a class="nav-link" href="../contratos.php"><i class="fas fa-plus me-2"></i>Nuevo Contrato</a>
-                        <a class="nav-link" href="../lista_visitas.php"><i class="fas fa-calendar-check me-2"></i>Ver Visitas</a>
-                        <a class="nav-link" href="../visitas.php"><i class="fas fa-plus me-2"></i>Programar Visita</a>
+                        <a class="nav-link" href="../visitas/lista_visitas.php"><i class="fas fa-calendar-check me-2"></i>Ver Visitas</a>
+                        <a class="nav-link" href="../visitas/crear_visita.php"><i class="fas fa-plus me-2"></i>Programar Visita</a>
                         <a class="nav-link" href="../lista_inspecciones.php"><i class="fas fa-search me-2"></i>Ver Inspecciones</a>
                         <a class="nav-link" href="../inspeccion.php"><i class="fas fa-plus me-2"></i>Nueva Inspección</a>
                         <hr class="my-2" style="border-color: rgba(255,255,255,0.3);">

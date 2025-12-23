@@ -47,7 +47,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Cliente</title>
-    <link rel="stylesheet" href="estilos.css"> </head>
+    <link rel="stylesheet" href="css/estilos.css"> </head>
 <body>
     <div class=logo-icono>
         <img src="uploads/logo_casa_meta.png" alt="logo">
