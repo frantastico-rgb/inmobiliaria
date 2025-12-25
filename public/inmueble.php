@@ -268,7 +268,7 @@ if (!empty($inmueble['video_url'])) {
             const ciudad = <?php echo json_encode($inmueble['ciudad_inm']); ?>;
             const precio = "<?php echo number_format($inmueble['precio_alq'], 0, ',', '.'); ?>";
             const id = "<?php echo $inmueble['cod_inm']; ?>";
-            const telefono = "<?php echo !empty($inmueble['tel_ofi']) ? preg_replace('/[^0-9]/', '', $inmueble['tel_ofi']) : '573001234567'; ?>";
+            const telefono = "<?php echo !empty($inmueble['tel_ofi']) ? preg_replace('/[^0-9]/', '', $inmueble['tel_ofi']) : '573246611306'; ?>";
             
             const mensaje = `Hola Casa Meta, estoy interesado en:\n` +
                             `📍 ${direccion}, ${ciudad}\n` +
