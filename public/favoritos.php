@@ -1,7 +1,6 @@
 <?php
 // Portal Público - Página de Favoritos
 require_once '../conexion.php';
-require_once __DIR__ . '/foto_utils.php';
 ?>
 
 <!DOCTYPE html>
@@ -109,7 +108,9 @@ require_once __DIR__ . '/foto_utils.php';
             padding: 12px 20px;
             border-radius: 8px;
             font-weight: bold;
-                        const imageUrl = property.foto ? property.foto : 'https://via.placeholder.com/400x250/e0e0e0/666666?text=Sin+Imagen';
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
             cursor: pointer;
             font-size: 14px;
             display: flex;
@@ -402,17 +403,12 @@ require_once __DIR__ . '/foto_utils.php';
 
         // Mostrar favoritos en el grid
         function displayFavorites() {
-            if (allFavorites.length === 0) {
-                loadFavoritesFromServer();
-                return;
-            }
+            const favoritesGrid = document.getElementById('favoritesGrid');
+            favoritesGrid.innerHTML = '';
 
-            const grid = document.getElementById('favoritesGrid');
-            grid.innerHTML = '';
-
-            allFavorites.forEach(favorite => {
-                const card = createFavoriteCard(favorite);
-                grid.appendChild(card);
+            allFavorites.forEach(property => {
+                const card = createFavoriteCard(property);
+                favoritesGrid.appendChild(card);
             });
         }
 
@@ -449,9 +445,12 @@ require_once __DIR__ . '/foto_utils.php';
             const card = document.createElement('div');
             card.className = 'property-card favorite-item';
             
+            // URL por defecto en Cloudinary
+            const defaultImage = 'https://res.cloudinary.com/drbeqchej/image/upload/no-disponible.png';
+
             const imageUrl = property.foto ? 
-                `../${property.foto}` : 
-                'https://via.placeholder.com/400x250/e0e0e0/666666?text=Sin+Imagen';
+                property.foto : 
+                defaultImage;
 
             card.innerHTML = `
                 <div class="compare-checkbox">
@@ -463,16 +462,16 @@ require_once __DIR__ . '/foto_utils.php';
                 </div>
                 
                 <div class="property-image">
-                    <img src="${imageUrl}" alt="${property.dir_inm}" 
-                         onerror="this.src='https://via.placeholder.com/400x250/e0e0e0/666666?text=Sin+Imagen'">
+                    <img src="${imageUrl}" alt="${property.dir_inm || 'Propiedad'}" 
+                         onerror="this.onerror=null; this.src='${defaultImage}'">
                 </div>
 
                 <div class="property-content">
-                    <div class="property-title">${property.dir_inm}</div>
+                    <div class="property-title">${property.dir_inm || 'Sin dirección'}</div>
                     
                     <div class="property-location">
                         <i class="fas fa-map-marker-alt"></i>
-                        ${property.barrio_inm}, ${property.ciudad_inm}
+                        ${property.barrio_inm || ''}, ${property.ciudad_inm || ''}
                     </div>
 
                     <div class="property-features">
@@ -482,16 +481,16 @@ require_once __DIR__ . '/foto_utils.php';
                         </div>
                         <div class="feature">
                             <i class="fas fa-bed"></i>
-                            <span>${property.num_hab} hab</span>
+                            <span>${property.num_hab || 0} hab</span>
                         </div>
                         <div class="feature">
                             <i class="fas fa-bath"></i>
-                            <span>${property.num_ban} baños</span>
+                            <span>${property.num_ban || '0'} baños</span>
                         </div>
                     </div>
 
                     <div class="property-price">
-                        $${new Intl.NumberFormat('es-CO').format(property.precio_alq)}
+                        $${new Intl.NumberFormat('es-CO').format(property.precio_alq || 0)}
                         <span class="price-period">/mes</span>
                     </div>
 
@@ -603,7 +602,9 @@ require_once __DIR__ . '/foto_utils.php';
             const card = document.createElement('div');
             card.className = 'property-card';
             
-            const imageUrl = property.foto ? property.foto : 'https://via.placeholder.com/300x200/e0e0e0/666666?text=Sin+Imagen';
+            const imageUrl = property.foto ? 
+                property.foto : 
+                'https://res.cloudinary.com/drbeqchej/image/upload/no-disponible.png';
 
             card.innerHTML = `
                 <div class="property-image">
@@ -659,10 +660,11 @@ require_once __DIR__ . '/foto_utils.php';
                 message += `${index + 1}. *${fav.dir_inm}*\n`;
                 message += `   📍 ${fav.barrio_inm}, ${fav.ciudad_inm}\n`;
                 message += `   💰 $${new Intl.NumberFormat('es-CO').format(fav.precio_alq)}\n`;
-                message += `   🏠 ${fav.nom_tipoinm} - ${fav.num_hab} hab, ${fav.num_ban} baños\n\n`;
+                message += `   🏠 ${fav.nom_tipoinm} - ${fav.num_hab} hab, ${fav.num_ban || 0} baños\n\n`;
             });
             
-            message += `Ver todas las propiedades en: ${window.location.origin}/INMOBILIARIA_1/public/`;
+            // Usamos la URL oficial de Render para que WhatsApp genere la tarjeta con el logo correctamente
+            message += `Ver todas las propiedades en: https://casameta.onrender.com`;
             
             const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');

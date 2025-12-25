@@ -35,6 +35,32 @@ $inmueble = $resultado->fetch_assoc();
 $foto_principal = get_foto_url($inmueble['foto']);
 $foto_1 = !empty($inmueble['foto_1']) ? get_foto_url($inmueble['foto_1']) : null;
 $foto_2 = !empty($inmueble['foto_2']) ? get_foto_url($inmueble['foto_2']) : null;
+
+// Lógica para Videos (Local/Cloudinary y Externo)
+$video_local = null;
+if (!empty($inmueble['video'])) {
+    $vid = trim(str_replace('"', '', $inmueble['video']));
+    // Si ya es URL completa (Cloudinary)
+    if (stripos($vid, 'http') === 0) {
+        // Corregir posible duplicidad de ruta upload/uploads si existe
+        $video_local = str_replace('/upload/uploads/', '/upload/', $vid);
+    } else {
+        // Si es nombre de archivo local, construir URL de Cloudinary (Video)
+        $video_local = "https://res.cloudinary.com/drbeqchej/video/upload/" . str_replace(' ', '_', basename(str_replace('uploads/', '', $vid)));
+    }
+}
+
+$video_externo = null;
+if (!empty($inmueble['video_url'])) {
+    $url = $inmueble['video_url'];
+    // Detectar y convertir enlaces de YouTube a formato embed
+    if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $url, $matches)) {
+        // Se agrega autoplay=1 y mute=1 para asegurar reproducción automática en la mayoría de navegadores
+        $video_externo = "https://www.youtube.com/embed/" . $matches[1] . "?autoplay=1&mute=1&rel=0";
+    } else {
+        $video_externo = $url; // Otros proveedores o enlace directo
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -53,6 +79,8 @@ $foto_2 = !empty($inmueble['foto_2']) ? get_foto_url($inmueble['foto_2']) : null
         .inmueble-detail { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; }
         .gallery-container { position: relative; height: 500px; background: #222; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .main-image { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease; cursor: zoom-in; }
+        .gallery-container { position: relative; height: 500px; background: #222; overflow: hidden; }
+        .main-image { width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; cursor: zoom-in; }
         .gallery-nav { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 12px; backdrop-filter: blur(5px); }
         .gallery-thumb { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
         .gallery-thumb.active { border-color: #3498db; transform: scale(1.1); }
@@ -85,6 +113,7 @@ $foto_2 = !empty($inmueble['foto_2']) ? get_foto_url($inmueble['foto_2']) : null
 
         <div class="inmueble-detail">
             <div class="gallery-container">
+                
                 <img id="mainImage" class="main-image" src="<?php echo $foto_principal; ?>" alt="Foto Inmueble">
                 
                 <div class="gallery-nav">
@@ -124,12 +153,68 @@ $foto_2 = !empty($inmueble['foto_2']) ? get_foto_url($inmueble['foto_2']) : null
                             <p><?php echo nl2br(htmlspecialchars($inmueble['caract_inm'])); ?></p>
                         </div>
 
-                        <?php if ($inmueble['latitude'] && $inmueble['longitud']): ?>
-                        <div class="map-section">
-                            <h3 style="margin-top: 25px;"><i class="fas fa-map"></i> Ubicación</h3>
-                            <div id="map" class="map-container"></div>
-                        </div>
+                        <?php if ($video_local || $video_externo): ?>
+                            <div class="video-section" style="margin-top: 30px; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #eee;">
+                                <h3 style="margin-bottom: 20px; color: #2c3e50;"><i class="fas fa-video"></i> Video Recorrido</h3>
+                                
+                                <?php if ($video_local): ?>
+                                    <div class="video-container" style="margin-bottom: 20px; border-radius: 8px; overflow: hidden; background: #000;">
+                                        <video controls style="width: 100%; max-height: 450px; display: block;">
+                                            <source src="<?php echo $video_local; ?>" type="video/mp4">
+                                            Tu navegador no soporta la reproducción de video.
+                                        </video>
+                                        <p style="padding: 10px; font-size: 14px; color: #fff; background: #333; margin: 0;"><i class="fas fa-film"></i> Video del inmueble</p>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if ($video_externo): ?>
+                                    <div class="video-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background: #000;">
+                                        <iframe src="<?php echo $video_externo; ?>" 
+                                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                                allowfullscreen>
+                                        </iframe>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         <?php endif; ?>
+
+<?php if (!empty($inmueble['latitude']) && !empty($inmueble['longitud'])): ?>
+    <div class="map-section">
+        <h3 style="margin-top: 25px;"><i class="fas fa-map"></i> Ubicación</h3>
+        <div id="map" class="map-container" style="height: 400px; width: 100%; border-radius: 10px; border: 1px solid #ddd;"></div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Extraemos los datos de PHP usando tus nombres de columna exactos
+        const lat = <?php echo floatval($inmueble['latitude']); ?>;
+        const lng = <?php echo floatval($inmueble['longitud']); ?>;
+
+        // Inicializamos el mapa centrado en las coordenadas del inmueble
+        const map = L.map('map').setView([lat, lng], 16);
+
+        // Cargamos la capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Colocamos el marcador (Pin)
+        L.marker([lat, lng]).addTo(map)
+            .bindPopup('<?php echo addslashes($inmueble['barrio_inm']); ?>')
+            .openPopup();
+
+        // Solución para evitar que el mapa cargue "gris" o incompleto
+        setTimeout(function() {
+            map.invalidateSize();
+        }, 500);
+    });
+    </script>
+<?php else: ?>
+    <div class="alert alert-warning mt-4">
+        <i class="fas fa-exclamation-triangle"></i> Coordenadas no disponibles para este inmueble.
+    </div>
+<?php endif; ?>
                     </div>
 
                     <div class="sidebar">
@@ -153,5 +238,48 @@ $foto_2 = !empty($inmueble['foto_2']) ? get_foto_url($inmueble['foto_2']) : null
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+
     <script>
-        // Cambiar imagen de
+        // Función para cambiar imagen en galería
+        function changeImage(src, element) {
+            document.getElementById('mainImage').src = src;
+            const thumbs = document.querySelectorAll('.gallery-thumb');
+            thumbs.forEach(thumb => thumb.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // Lógica de Favoritos (Faltaba esta función)
+        let favoritos = JSON.parse(localStorage.getItem('favoriteProperties') || '[]');
+        
+        function updateFavoritesCount() {
+            const el = document.getElementById('favoritesCountNav');
+            if(el) el.textContent = favoritos.length;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateFavoritesCount();
+        });
+
+        // Función unificada y segura para WhatsApp
+        function contactarWhatsApp() {
+            // Datos seguros desde PHP
+            const direccion = <?php echo json_encode($inmueble['dir_inm']); ?>;
+            const ciudad = <?php echo json_encode($inmueble['ciudad_inm']); ?>;
+            const precio = "<?php echo number_format($inmueble['precio_alq'], 0, ',', '.'); ?>";
+            const id = "<?php echo $inmueble['cod_inm']; ?>";
+            const telefono = "<?php echo !empty($inmueble['tel_ofi']) ? preg_replace('/[^0-9]/', '', $inmueble['tel_ofi']) : '573001234567'; ?>";
+            
+            const mensaje = `Hola Casa Meta, estoy interesado en:\n` +
+                            `📍 ${direccion}, ${ciudad}\n` +
+                            `💰 $${precio}\n` +
+                            `🆔 Ref: ${id}\n` +
+                            `🔗 ${window.location.href}`;
+
+            const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
+?><?php

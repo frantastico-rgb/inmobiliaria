@@ -280,6 +280,11 @@ $conn->close();
         <div>
             <button type="submit">Guardar Cambios</button>
             <a href="lista_inmuebles.php">Cancelar</a>
+            
+            <!-- Botón para generar SQL de Nube -->
+            <a href="public/generar_sql_nube.php?id=<?php echo $inmueble['cod_inm']; ?>" target="_blank" style="background-color: #6f42c1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-left: 10px;">
+                ☁️ Generar SQL Nube
+            </a>
         </div>
     </form>
 

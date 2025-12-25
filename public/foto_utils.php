@@ -1,19 +1,19 @@
 <?php
-/**
- * Utilidad para obtener la URL Cloudinary de una foto
- * Uso: get_foto_url($foto)
- */
 function get_foto_url($foto) {
+    // 1. Limpieza inicial
     $foto = trim(str_replace('"', '', $foto));
     $cloudinary_base = "https://res.cloudinary.com/drbeqchej/image/upload/";
-    $foto_default = $cloudinary_base . "no-disponible.png";
-
+    
     if (empty($foto)) {
-        return $foto_default;
+        return $cloudinary_base . "no-disponible.png"; // Imagen por defecto en Cloudinary
     }
-    if (stripos($foto, 'http') === 0) {
-        return str_replace(' ', '_', $foto);
-    }
+    
+    // 2. Extraer solo el nombre del archivo final.
+    // Esto funciona para URLs completas (ej: .../uploads/mi_foto.jpg) y rutas locales (ej: uploads/mi_foto.jpg),
+    // ya que en ambos casos, el public_id en Cloudinary es simplemente "mi_foto.jpg".
     $nombre_archivo = basename($foto);
+    
+    // 3. Construir la URL final, limpia y no versionada.
+    // Cloudinary encontrará el archivo por su public_id, que es el nombre del archivo.
     return $cloudinary_base . str_replace(' ', '_', $nombre_archivo);
 }

@@ -1,61 +1,44 @@
 <?php
-// API para obtener datos de inmuebles favoritos
-require_once '../conexion.php';
-require_once __DIR__ . '/foto_utils.php';
-
+// Evitar que cualquier error de PHP ensucie la salida JSON
+error_reporting(0);
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Método no permitido']);
-    exit;
+// CORRECCIÓN 1: Incluir la conexión a la base de datos. Sin esto, la consulta falla.
+require_once __DIR__ . '/../src/conexion.php';
+
+if (file_exists(__DIR__ . '/foto_utils.php')) {
+    require_once __DIR__ . '/foto_utils.php';
+} else {
+    // Definimos una función de emergencia por si el archivo no carga
+    function get_foto_url($foto) { return $foto; }
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
+$data = json_decode(file_get_contents('php://input'), true);
+$ids = isset($data['ids']) ? $data['ids'] : [];
 
-if (!isset($input['ids']) || !is_array($input['ids']) || empty($input['ids'])) {
+if (empty($ids)) {
     echo json_encode([]);
     exit;
 }
 
-try {
-    // Sanitizar IDs
-    $ids = array_filter(array_map('intval', $input['ids']));
-    
-    if (empty($ids)) {
-        echo json_encode([]);
-        exit;
-    }
+// CORRECCIÓN 2: Usar la columna correcta 'cod_tipoinm' en el JOIN.
+$placeholders = implode(',', array_fill(0, count($ids), '?'));
+$sql = "SELECT i.*, t.nom_tipoinm 
+        FROM inmuebles i 
+        LEFT JOIN tipo_inmueble t ON i.cod_tipoinm = t.cod_tipoinm 
+        WHERE i.cod_inm IN ($placeholders)";
 
-    // Crear placeholders para la consulta
-    $placeholders = str_repeat('?,', count($ids) - 1) . '?';
-    
-    // Consulta SQL
-    $sql = "SELECT i.*, t.nom_tipoinm, p.nom_prop, p.tel_prop 
-            FROM inmuebles i 
-            LEFT JOIN tipo_inmueble t ON i.cod_tipoinm = t.cod_tipoinm 
-            LEFT JOIN propietarios p ON i.cod_prop = p.cod_prop 
-            WHERE i.cod_inm IN ($placeholders)
-            ORDER BY i.cod_inm DESC";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param(str_repeat('i', count($ids)), ...$ids);
+$stmt->execute();
+$result = $stmt->get_result();
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param(str_repeat('i', count($ids)), ...$ids);
-    $stmt->execute();
-    
-    $resultado = $stmt->get_result();
-    $inmuebles = [];
+$favorites = [];
 
-    while ($row = $resultado->fetch_assoc()) {
-        $row['foto'] = get_foto_url($row['foto']);
-        $inmuebles[] = $row;
-    }
-
-    echo json_encode($inmuebles);
-
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Error del servidor']);
+while ($row = $result->fetch_assoc()) {
+    $row['foto'] = get_foto_url($row['foto'] ?? '');
+    $favorites[] = $row;
 }
 
-$conn->close();
-?>
+echo json_encode($favorites);
+exit;

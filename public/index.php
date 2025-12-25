@@ -1,34 +1,7 @@
 <?php
 // Portal Público - Catálogo de Inmuebles
 require_once __DIR__ . '/../src/conexion.php';
-
-/**
- * Función optimizada para obtener la URL de la foto
- * Detecta si la URL ya es completa (TiDB) o si necesita construcción
- */
-function get_foto_url($foto) {
-    // 1. Limpieza de posibles comillas o espacios accidentales
-    $foto = trim(str_replace('"', '', $foto));
-    
-    // URL por defecto si el campo está vacío
-    $cloudinary_base = "https://res.cloudinary.com/drbeqchej/image/upload/";
-    $foto_default = $cloudinary_base . "no-disponible.png";
-
-    if (empty($foto)) {
-        return $foto_default;
-    }
-
-    // 2. Si la base de datos ya tiene el link completo (comienza con http)
-    if (stripos($foto, 'http') === 0) {
-        // Solo nos aseguramos de que no haya espacios (los cambiamos por _)
-        return str_replace(' ', '_', $foto);
-    } 
-    
-    // 3. Si la base de datos solo tiene el nombre del archivo (ej: "casa.jpg")
-    // Tomamos solo el nombre final para evitar rutas relativas como "uploads/foto.jpg"
-    $nombre_archivo = basename($foto);
-    return $cloudinary_base . str_replace(' ', '_', $nombre_archivo);
-}
+require_once __DIR__ . '/foto_utils.php';
 
 // Obtener filtros de búsqueda
 $filtro_tipo = isset($_GET['tipo']) ? $_GET['tipo'] : '';
@@ -103,6 +76,14 @@ $ciudades_resultado = $conn->query($sql_ciudades);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Etiquetas para vista previa en WhatsApp y Redes Sociales -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Casa Meta - Catálogo de Inmuebles">
+    <meta property="og:description" content="Conectamos Sueños con el espacio perfecto. Explora nuestras propiedades destacadas en venta y alquiler.">
+    <meta property="og:image" content="https://res.cloudinary.com/drbeqchej/image/upload/logo_casa_meta.png">
+    <meta property="og:url" content="https://casameta.onrender.com">
+
     <title>Casa Meta - Catálogo de Inmuebles</title>
     <link rel="stylesheet" href="css/catalogo.css">
     <link rel="stylesheet" href="css/compare-widget.css">
