@@ -4,7 +4,7 @@ error_reporting(0);
 header('Content-Type: application/json');
 
 // CORRECCIÓN 1: Incluir la conexión a la base de datos. Sin esto, la consulta falla.
-require_once __DIR__ . '/../src/conexion.php';
+require_once __DIR__ . '/../conexion.php';
 
 if (file_exists(__DIR__ . '/foto_utils.php')) {
     require_once __DIR__ . '/foto_utils.php';

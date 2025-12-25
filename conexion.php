@@ -20,7 +20,7 @@ if (!$conn) {
 
 // Lógica inteligente: Si estamos en un entorno de producción (como Render)
 // y el certificado CA existe, usamos una conexión SSL.
-if (getenv('ENV_MODE') === 'production' && file_exists($ssl_ca)) {
+if ((getenv('ENV_MODE') === 'production' || getenv('RENDER')) && file_exists($ssl_ca)) {
     
     // Establecer las opciones de SSL
     if (!mysqli_ssl_set($conn, NULL, NULL, $ssl_ca, NULL, NULL)) {

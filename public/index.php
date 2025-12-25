@@ -1,6 +1,6 @@
 <?php
 // Portal Público - Catálogo de Inmuebles
-require_once __DIR__ . '/../src/conexion.php';
+require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/foto_utils.php';
 
 // Obtener filtros de búsqueda

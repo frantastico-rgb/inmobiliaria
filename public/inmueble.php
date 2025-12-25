@@ -1,6 +1,6 @@
 <?php
 // Portal Público - Vista Detallada de Inmueble
-require_once __DIR__ . '/../src/conexion.php';
+require_once __DIR__ . '/../conexion.php';
 require_once __DIR__ . '/foto_utils.php';
 
 // Verificar que se proporcionó un ID
