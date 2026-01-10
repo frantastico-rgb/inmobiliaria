@@ -84,6 +84,22 @@ $ciudades_resultado = $conn->query($sql_ciudades);
     <meta property="og:image" content="https://res.cloudinary.com/drbeqchej/image/upload/logo_casa_meta.png">
     <meta property="og:url" content="https://casameta.onrender.com">
 
+    <!-- Meta Pixel Code (Facebook) -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', 'TU_PIXEL_ID'); // <-- REEMPLAZA ESTO CON TU ID DE PIXEL REAL
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=TU_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
+    <!-- End Meta Pixel Code -->
+
     <title>Casa Meta - Catálogo de Inmuebles</title>
     <link rel="stylesheet" href="css/catalogo.css">
     <link rel="stylesheet" href="css/compare-widget.css">
@@ -167,7 +183,7 @@ $ciudades_resultado = $conn->query($sql_ciudades);
                                 </div>
 
                                 <div class="property-actions">
-                                    <a href="inmueble.php?id=<?= $inmueble['cod_inm']; ?>" class="btn-details">Ver detalles</a>
+                                    <a href="inmueble.php?id=<?= $inmueble['cod_inm']; ?>" class="btn-details" onclick="trackViewContent('<?= $inmueble['cod_inm'] ?>', '<?= addslashes($inmueble['dir_inm']) ?>', <?= floatval($inmueble['precio_alq']) ?>)">Ver detalles</a>
                                     <button class="btn-favorite" onclick="toggleFavorite(<?= $inmueble['cod_inm']; ?>)">
                                         <i class="far fa-heart"></i>
                                     </button>
@@ -207,6 +223,25 @@ $ciudades_resultado = $conn->query($sql_ciudades);
             location.reload(); // Para actualizar iconos
         }
         document.addEventListener('DOMContentLoaded', updateFavoritesCount);
+
+        /**
+         * Rastrea el evento 'ViewContent' del Pixel de Facebook cuando un usuario ve los detalles de una propiedad.
+         * @param {string} propertyId - El ID único del inmueble.
+         * @param {string} propertyName - El nombre o dirección del inmueble.
+         * @param {number} propertyValue - El precio del inmueble.
+         */
+        function trackViewContent(propertyId, propertyName, propertyValue) {
+            // Verificar si la función del Pixel de Facebook (fbq) está disponible
+            if (typeof fbq === 'function') {
+                fbq('track', 'ViewContent', {
+                    content_type: 'product', // 'product' es un tipo estándar para catálogos
+                    content_ids: [String(propertyId)], // Debe ser un array de strings
+                    content_name: propertyName,
+                    value: parseFloat(propertyValue),
+                    currency: 'COP' // Peso Colombiano
+                });
+            }
+        }
     </script>
 </body>
 </html>

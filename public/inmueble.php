@@ -31,6 +31,16 @@ if ($resultado->num_rows === 0) {
 
 $inmueble = $resultado->fetch_assoc();
 
+// --- Preparación de Variables para Open Graph ---
+$og_title = htmlspecialchars($inmueble['dir_inm'] . " - $" . number_format($inmueble['precio_alq']));
+$og_description = htmlspecialchars(substr(strip_tags($inmueble['caract_inm']), 0, 160) . '...');
+// Asegúrate de que esta sea tu URL de producción final
+$og_url = 'https://casameta.onrender.com/public/inmueble.php?id=' . $inmueble['cod_inm'];
+// Usamos la misma lógica que ya tienes para obtener la URL de la foto
+$og_image = get_foto_url($inmueble['foto']);
+// --- Fin de la preparación ---
+
+
 // Pre-procesar URLs de fotos para la galería
 $foto_principal = get_foto_url($inmueble['foto']);
 $foto_1 = !empty($inmueble['foto_1']) ? get_foto_url($inmueble['foto_1']) : null;
@@ -69,6 +79,15 @@ if (!empty($inmueble['video_url'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($inmueble['dir_inm']); ?> - Casa Meta</title>
+
+    <!-- Open Graph Dinámico para este Inmueble -->
+    <meta property="og:title" content="<?php echo $og_title; ?>" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="<?php echo $og_url; ?>" />
+    <meta property="og:image" content="<?php echo $og_image; ?>" />
+    <meta property="og:description" content="<?php echo $og_description; ?>" />
+    <meta property="og:site_name" content="Casa Meta" />
+
     <link rel="stylesheet" href="css/catalogo.css">
     <link rel="stylesheet" href="css/compare-widget.css">
     <link rel="stylesheet" href="css/leads-system.css">
