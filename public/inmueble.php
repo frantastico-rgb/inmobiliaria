@@ -35,7 +35,7 @@ $inmueble = $resultado->fetch_assoc();
 $og_title = htmlspecialchars($inmueble['dir_inm'] . " - $" . number_format($inmueble['precio_alq']));
 $og_description = htmlspecialchars(substr(strip_tags($inmueble['caract_inm']), 0, 160) . '...');
 // Asegúrate de que esta sea tu URL de producción final
-$og_url = 'https://casameta.onrender.com/public/inmueble.php?id=' . $inmueble['cod_inm'];
+$og_url = 'https://casameta.onrender.com/inmueble.php?id=' . $inmueble['cod_inm'];
 // Usamos la misma lógica que ya tienes para obtener la URL de la foto
 $og_image = get_foto_url($inmueble['foto']);
 // --- Fin de la preparación ---
